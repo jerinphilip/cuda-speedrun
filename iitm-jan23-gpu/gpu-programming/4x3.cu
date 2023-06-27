@@ -1,13 +1,11 @@
-#include <stdio.h>
 #include <cuda.h>
+#include <stdio.h>
 
-__global__ void K() {
-	printf("%d\n", threadIdx.x + threadIdx.y);
-}
+__global__ void K() { printf("%d\n", threadIdx.x + threadIdx.y); }
 int main() {
-	dim3 block(3, 4);
-	K<<<1, block>>>();
-	cudaDeviceSynchronize();
+  dim3 block(3, 4);
+  K<<<1, block>>>();
+  cudaDeviceSynchronize();
 
-	return 0;
+  return 0;
 }

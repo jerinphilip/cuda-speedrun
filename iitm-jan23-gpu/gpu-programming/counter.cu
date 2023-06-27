@@ -1,15 +1,15 @@
-#include <stdio.h>
 #include <cuda.h>
+#include <stdio.h>
 
 __global__ void alloutputs(int *counter) {
-    int oldc = atomicAdd(counter, 1);
-    if (*counter == 34) printf("%d\n", oldc);
+  int oldc = atomicAdd(counter, 1);
+  if (*counter == 34) printf("%d\n", oldc);
 }
 int main() {
-     int *counter, hcounter = 0;
-    cudaMalloc(&counter, sizeof(int));
-    cudaMemcpy(counter, &hcounter, sizeof(int), cudaMemcpyHostToDevice);
-    alloutputs<<<1, 34>>>(counter);
-    cudaDeviceSynchronize();
-    return 0;
+  int *counter, hcounter = 0;
+  cudaMalloc(&counter, sizeof(int));
+  cudaMemcpy(counter, &hcounter, sizeof(int), cudaMemcpyHostToDevice);
+  alloutputs<<<1, 34>>>(counter);
+  cudaDeviceSynchronize();
+  return 0;
 }

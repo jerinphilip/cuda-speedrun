@@ -2,30 +2,30 @@
 #include <stdio.h>
 
 __global__ void printk(int *counter) {
-	do {
-		while (*counter % 2)
-			;
-		++*counter;
-		//__threadfence_system();
-		printf("\t%d\n", *counter);
-	} while (*counter < 10);
+  do {
+    while (*counter % 2)
+      ;
+    ++*counter;
+    //__threadfence_system();
+    printf("\t%d\n", *counter);
+  } while (*counter < 10);
 }
 int main() {
-	int *counter;
+  int *counter;
 
-	cudaHostAlloc(&counter, sizeof(int), 0);
-	//cudaHostAlloc(&counter, sizeof(int), cudaHostAllocMapped);
-	printk <<<1, 1>>>(counter);
+  cudaHostAlloc(&counter, sizeof(int), 0);
+  // cudaHostAlloc(&counter, sizeof(int), cudaHostAllocMapped);
+  printk<<<1, 1>>>(counter);
 
-	do {
-		printf("%d\n", *counter);
-		//fflush(stdout);
-		while (*counter % 2 == 0)
-			;
-		++*counter;
-		//__threadfence_system();
-	} while (*counter < 10);
+  do {
+    printf("%d\n", *counter);
+    // fflush(stdout);
+    while (*counter % 2 == 0)
+      ;
+    ++*counter;
+    //__threadfence_system();
+  } while (*counter < 10);
 
-	cudaFreeHost(counter);
-	return 0;
+  cudaFreeHost(counter);
+  return 0;
 }

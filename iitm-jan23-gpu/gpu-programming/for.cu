@@ -1,11 +1,9 @@
-#include <stdio.h>
 #include <cuda.h>
+#include <stdio.h>
 #define N 10
-__global__ void f() {
-	printf("%d\n", threadIdx.x);
-}
+__global__ void f() { printf("%d\n", threadIdx.x); }
 int main() {
-	f<<<1, N>>>();
-	cudaThreadSynchronize();
-	return 0;
+  f<<<1, N>>>();
+  cudaThreadSynchronize();
+  return 0;
 }
