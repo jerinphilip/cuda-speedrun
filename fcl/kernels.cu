@@ -38,3 +38,8 @@ __global__ void print_hello_world() {
   // Does this mean device can call functions that execute on the host?
   printf("Hello World.\n");
 }
+
+__global__ void scalar_init(int *A) {
+  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  A[id] = static_cast<int>(id);
+}

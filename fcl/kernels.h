@@ -12,3 +12,5 @@ __global__ void vcube_(int *A);  // NOLINT
 __global__ void fused_sqr_cub_add(const int *A, const int *B, int *C);
 
 __global__ void print_hello_world();
+
+__global__ void scalar_init(int *A);

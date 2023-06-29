@@ -101,10 +101,22 @@ void compare_fused_separate() {
             << fc_runtime << "\n";
 }
 
-void matmul() {
-  const size_t M = 1000, N = 1000, P = 1000;
+void matrix_init() {
+  constexpr size_t M = 64, N = 64, P = 64;
   Buffer<int> A(M * N, Device::CPU);
   Buffer<int> B(N * P, Device::CPU);
+
+  auto gA = A.to(Device::GPU);
+  auto gB = A.to(Device::GPU);
+
+  scalar_init<<<M, N>>>(gA.data());
+  scalar_init<<<N, P>>>(gB.data());
+
+  auto iA = gA.to(Device::CPU);
+  auto iB = gA.to(Device::CPU);
+
+  std::cout << iA << "\n";
+  std::cout << iB << "\n";
 }
 
 void hello_world() {
