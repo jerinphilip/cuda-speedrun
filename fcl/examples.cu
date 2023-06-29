@@ -109,8 +109,13 @@ void matrix_init() {
   auto gA = A.to(Device::GPU);
   auto gB = A.to(Device::GPU);
 
-  scalar_init<<<M, N>>>(gA.data());
-  scalar_init<<<N, P>>>(gB.data());
+  if (false) {
+    scalar_init<<<M, N>>>(gA.data());
+    scalar_init<<<N, P>>>(gB.data());
+  } else {
+    scalar_init<<<M / 2, N * 2>>>(gA.data());
+    scalar_init<<<N / 2, P * 2>>>(gB.data());
+  }
 
   auto iA = gA.to(Device::CPU);
   auto iB = gA.to(Device::CPU);
