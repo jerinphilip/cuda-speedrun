@@ -14,6 +14,20 @@
   } while (0)
 
 void compare_fused_separate() {
+  // The following exercise is in 2-computation, slide 19.
+  // http://www.cse.iitm.ac.in/~rupesh/teaching/gpu/jan23/2-computation.pdf
+  //
+  //  1. Write a CUDA program to initialize an array of size 32 to all zeros in
+  //  parallel.
+  //  2. Change the array size to 1024.
+  //  3. Create another kernel that adds i to array[i].
+  //  4. Change the array size to 8000.
+  //  5. Check if answer to problem 3 still works.
+
+  // This does not work for size larger than 1024.
+  // https://stackoverflow.com/questions/28928632/cuda-program-not-working-for-more-than-1024-threads
+  // gpuErrchk(cudaPeekAtLastError());
+
   constexpr size_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
   std::fill(a.data(), a.data() + a.size(), 1);
