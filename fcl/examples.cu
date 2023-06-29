@@ -8,7 +8,7 @@
 #include "fcl/kernels.h"
 
 void compare_fused_separate() {
-  constexpr size_t size = 1000;  // NOLINT
+  constexpr size_t size = 100;  // NOLINT
   Buffer<int> a(size, Device::CPU);
   std::iota(a.data(), a.data() + a.size(), 0);
   auto ga = a.to(Device::GPU);
@@ -31,25 +31,38 @@ void compare_fused_separate() {
     return c;
   };
 
-  Buffer<int> pc = pipelined();
-  Buffer<int> fc = fused();
+  // Important to run fused after pipelined, because we're using in place vsqr_
+  // and vcube_, which will affect outputs if pipelined is ran first.
 
-  auto validate = [&](Buffer<int> &gc) {
+  Buffer<int> fc = fused();
+  Buffer<int> pc = pipelined();
+
+  auto validate = [&](const Buffer<int> &gc) -> bool {
+    bool flag = true;
     Buffer<int> c = gc.to(Device::CPU);
-    std::cout << c << "\n";
+    std::cout << "a: " << a << "\n\n";
+    std::cout << "b: " << b << "\n\n";
+    std::cout << "c: " << c << "\n\n";
 
     int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
     for (size_t i = 0; i < c.size(); i++) {              // NOLINT
       int x = *px, y = *py, z = *pz;                     // NOLINT
       int expected = x * x + y * y * y;
       if (z != expected) {
-        printf("computed %d != %d expected\n", z, expected);
-        fprintf(stderr, "Mismatch found.\n");
+        // fprintf(stderr, "computed %d != %d expected (%d, %d)\n", z, expected,
+        // x,
+        //         y);
+        // fprintf(stderr, "Mismatch found.\n");
+        flag = false;
       };
       ++px, ++py, ++pz;
     }
+    return flag;
   };
 
-  validate(fc);
-  validate(pc);
+  bool pipeline_ret = validate(pc);
+  bool fused_ret = validate(fc);
+
+  std::cout << "Pipelined: " << (pipeline_ret ? "success" : "failure") << "\n";
+  std::cout << "Fused: " << (fused_ret ? "success" : "failure") << "\n";
 }

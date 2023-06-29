@@ -1,6 +1,6 @@
 #include <cuda.h>
 
-__global__ void vsqt(int *A) {
+__global__ void vsqr(int *A) {
   // Kernel computes vsqr for one  data-item.
   A[threadIdx.x] = threadIdx.x * threadIdx.x;
 }
@@ -25,6 +25,7 @@ __global__ void vadd(const int *A, const int *B, int *C) {
 
 __global__ void fused_sqr_cub_add(const int *A, const int *B, int *C) {
   int i = threadIdx.x;
-  int x = A[i], y = B[i];  // NOLINT
-  C[i] = x * x + y * y * y;
+  int x = A[i];
+  int y = B[i];
+  C[i] = (x * x) + (y * y * y);
 }
