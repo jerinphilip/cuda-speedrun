@@ -1,1 +1,1 @@
-add_executable(fcl frontend.cc)
+add_executable(fcl frontend.cc examples.cu kernels.cu)

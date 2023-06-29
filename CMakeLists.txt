@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.5.1)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-project(fcl CXX C)
+project(fcl LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+enable_language("CUDA")
+find_package(CUDA 8.0)
 
 add_subdirectory(3rd-party)
 include_directories(3rd-party)

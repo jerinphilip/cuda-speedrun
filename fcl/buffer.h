@@ -6,9 +6,6 @@
 #include <memory>
 #include <vector>
 
-// NOLINTBEGIN
-enum class Device { CPU, GPU };
-// NOLINTEND
 // https://stackoverflow.com/a/14038590/4565794
 #define gpuErrchk(ans) \
   { gpuAssert((ans), __FILE__, __LINE__); }
@@ -21,6 +18,10 @@ inline void gpuAssert(cudaError_t code, const char *file, int line,
     if (abort) exit(code);
   }
 }
+
+// NOLINTBEGIN
+enum class Device { CPU, GPU };
+// NOLINTEND
 
 template <class Scalar>
 class BaseBuffer {
@@ -67,8 +68,8 @@ class Buffer {
   Buffer(size_t size, Device device) : size_(size), device_(device) {}
 
   const Device &device() const { return device_; }
-  Scalar *data() { return buffer_; }
-  size_t size() const { return size_; }
+  Scalar *data() { return buffer_->data(); }
+  size_t size() const { return buffer_->size(); }
 
   Buffer<Scalar> to(Device device) {
     if (device == Device::CPU and device_ == Device::GPU) {
@@ -81,7 +82,8 @@ class Buffer {
     if (device == Device::GPU and device_ == Device::CPU) {
       Buffer<Scalar> result(size_, device);
       size_t mem_size = size_ * sizeof(Scalar);
-      cudaMemcpy(buffer_, result.data(), mem_size, cudaMemcpyHostToDevice);
+      cudaMemcpy(buffer_->data(), result.data(), mem_size,
+                 cudaMemcpyHostToDevice);
       return result;
     }
 
