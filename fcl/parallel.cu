@@ -1,12 +1,10 @@
 #include <cuda.h>
 
 #include <cstdio>
-#define N 100
 
-__global__ void vsqr(int *A) {
-  // Kernel computes vsqr for one  data-item.
-  A[threadIdx.x] = threadIdx.x * threadIdx.x;
-}
+#include "kernels.h"
+
+#define N 100
 
 int main() {
   int host_buffer[N];

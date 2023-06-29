@@ -1,23 +1,11 @@
 #include <cuda.h>
-#incldue "buffer.h"
 
 #include <cstdio>
 #include <vector>
 
+#include "buffer.h"
+
 #define N 1000
-
-// https://stackoverflow.com/a/14038590/4565794
-#define gpuErrchk(ans) \
-  { gpuAssert((ans), __FILE__, __LINE__); }
-
-inline void gpuAssert(cudaError_t code, const char *file, int line,
-                      bool abort = true) {
-  if (code != cudaSuccess) {
-    fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file,
-            line);
-    if (abort) exit(code);
-  }
-}
 
 __global__ void vsqr_(int *A) {  // NOLINT
   // Kernel computes vsqr for one  data-item.
@@ -56,11 +44,11 @@ int main() {
   std::vector<int> first = generate(N);
   std::vector<int> second = generate(N);
 
-  GPUBuffer<int> g_first(first.data(), first.size());
-  GPUBuffer<int> g_second(second.data(), second.size());
+  Buffer<int> g_first(first.data(), first.size());
+  Buffer<int> g_second(second.data(), second.size());
 
   auto pipelined = [&]() {
-    GPUBuffer<int> g_result(N);
+    Buffer<int> g_result(N);
     vsqr_<<<1, N>>>(g_first.data());
     vcube_<<<1, N>>>(g_second.data());
     vadd<<<1, N>>>(g_first.data(), g_second.data(), g_result.data());
@@ -68,16 +56,16 @@ int main() {
   };
 
   auto fused = [&]() {
-    GPUBuffer<int> g_result(N);
+    Buffer<int> g_result(N);
     fused_sqr_cub_add<<<1, N>>>(g_first.data(), g_second.data(),
                                 g_result.data());
     return g_result;
   };
 
-  // GPUBuffer<int> g_result = pipelined();
-  GPUBuffer<int> g_result = fused();
+  // Buffer<int> g_result = pipelined();
+  Buffer<int> g_result = fused();
 
-  std::vector<int> result = g_result.cpu();
+  Buffer<int> result = g_result.cpu();
   for (size_t i = 0; i < result.size(); i++) {  // NOLINT
     int x = first[i], y = second[i];            // NOLINT
     if (result[i] != x * x + y * y * y) {
