@@ -167,10 +167,15 @@ void matrix_squaring() {
   matrix_square_cpu(A.data(), N, B.data());
   double cpu_time = cpu_timer.elapsed() * 1000;
 
+  // Version 1 is 1xN dispatch.
+  // Each of the 1xN parallelizes the outer loop with index i.
   Timer gpu_timer_v1;
   matrix_square_v1<<<1, N>>>(gA.data(), N, gB_v1.data());
   double gpu_time_v1 = gpu_timer_v1.elapsed() * 1000;
 
+  // Version 2 is NxN dispatch.
+  // Each of the NxN retrieves i, j as idx/N and idx%N
+  // And executes the loop over k.
   Timer gpu_timer_v2;
   matrix_square_v2<<<N, N>>>(gA.data(), N, gB_v2.data());
   double gpu_time_v2 = gpu_timer_v2.elapsed() * 1000;
