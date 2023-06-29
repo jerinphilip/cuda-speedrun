@@ -6,15 +6,16 @@
 
 #include "fcl/buffer.h"
 #include "fcl/kernels.h"
+#include "fcl/timer.h"
 
 void compare_fused_separate() {
-  constexpr size_t size = 100;  // NOLINT
+  constexpr size_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
-  std::iota(a.data(), a.data() + a.size(), 0);
+  std::fill(a.data(), a.data() + a.size(), 1);
   auto ga = a.to(Device::GPU);
 
   Buffer<int> b(size, Device::CPU);
-  std::iota(b.data(), b.data() + b.size(), 0);
+  std::fill(b.data(), b.data() + b.size(), 1);
   auto gb = b.to(Device::GPU);
 
   auto pipelined = [&]() {
@@ -34,15 +35,21 @@ void compare_fused_separate() {
   // Important to run fused after pipelined, because we're using in place vsqr_
   // and vcube_, which will affect outputs if pipelined is ran first.
 
+  Timer ft;
   Buffer<int> fc = fused();
+  double fc_runtime = ft.elapsed() * 1000;
+
+  Timer fp;
   Buffer<int> pc = pipelined();
+  double pc_runtime = fp.elapsed() * 1000;
 
   auto validate = [&](const Buffer<int> &gc) -> bool {
     bool flag = true;
     Buffer<int> c = gc.to(Device::CPU);
-    std::cout << "a: " << a << "\n\n";
-    std::cout << "b: " << b << "\n\n";
-    std::cout << "c: " << c << "\n\n";
+
+    // std::cout << "a: " << a << "\n\n";
+    // std::cout << "b: " << b << "\n\n";
+    // std::cout << "c: " << c << "\n\n";
 
     int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
     for (size_t i = 0; i < c.size(); i++) {              // NOLINT
@@ -63,6 +70,14 @@ void compare_fused_separate() {
   bool pipeline_ret = validate(pc);
   bool fused_ret = validate(fc);
 
-  std::cout << "Pipelined: " << (pipeline_ret ? "success" : "failure") << "\n";
-  std::cout << "Fused: " << (fused_ret ? "success" : "failure") << "\n";
+  std::cout << "Pipelined: " << (pipeline_ret ? "success" : "failure") << " "
+            << pc_runtime << "\n";
+  std::cout << "Fused: " << (fused_ret ? "success" : "failure") << " "
+            << fc_runtime << "\n";
+}
+
+void matmul() {
+  const size_t M = 1000, N = 1000, P = 1000;
+  Buffer<int> A(M * N, Device::CPU);
+  Buffer<int> B(N * P, Device::CPU);
 }
