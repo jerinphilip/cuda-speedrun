@@ -14,3 +14,6 @@ __global__ void fused_sqr_cub_add(const int *A, const int *B, int *C);
 __global__ void print_hello_world();
 
 __global__ void scalar_init(int *A);
+
+__global__ void matrix_square_v1(const int *A, size_t N, int *B);
+__global__ void matrix_square_v2(const int *A, size_t N, int *B);

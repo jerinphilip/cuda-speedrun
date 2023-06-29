@@ -68,7 +68,7 @@ void compare_fused_separate() {
   double pc_runtime = fp.elapsed() * 1000;
   gpuErrchk(cudaPeekAtLastError());
 
-  auto validate = [&](const Buffer<int>& gc) -> bool {
+  auto validate = [&](const Buffer<int> &gc) -> bool {
     bool flag = true;
     Buffer<int> c = gc.to(Device::CPU);
 
@@ -134,6 +134,61 @@ void matrix_init() {
 void hello_world() {
   print_hello_world<<<1, 1>>>();
   cudaDeviceSynchronize();
+}
+
+void matrix_squaring() {
+  auto matrix_square_cpu = [](const int *A, size_t N, int *B) {
+    for (size_t i = 0; i < N; ++i) {
+      for (size_t j = 0; j < N; ++j) {
+        for (size_t k = 0; k < N; ++k) {
+          B[i * N + j] += A[i * N + k] * A[k * N + j];
+        }
+      }
+    }
+  };
+
+  constexpr size_t N = 64;
+
+  Buffer<int> A(N * N, Device::CPU);
+
+  // Initialize.
+  // std::iota(A.data(), A.data() + A.size(), 1);
+  std::fill(A.data(), A.data() + A.size(), 1);
+
+  auto gA = A.to(Device::GPU);
+
+  Buffer<int> B(N * N, Device::CPU);
+  std::fill(B.data(), B.data() + B.size(), 0);
+
+  auto gB_v1 = B.to(Device::GPU);
+  auto gB_v2 = B.to(Device::GPU);
+
+  Timer cpu_timer;
+  matrix_square_cpu(A.data(), N, B.data());
+  double cpu_time = cpu_timer.elapsed() * 1000;
+
+  Timer gpu_timer_v1;
+  matrix_square_v1<<<1, N>>>(gA.data(), N, gB_v1.data());
+  double gpu_time_v1 = gpu_timer_v1.elapsed() * 1000;
+
+  Timer gpu_timer_v2;
+  matrix_square_v2<<<N, N>>>(gA.data(), N, gB_v2.data());
+  double gpu_time_v2 = gpu_timer_v2.elapsed() * 1000;
+
+  auto C_v1 = gB_v1.to(Device::CPU);
+  auto C_v2 = gB_v2.to(Device::CPU);
+
+  int *pb = B.data(), *pc_v1 = C_v1.data(), *pc_v2 = C_v2.data();  // NOLINT
+  for (size_t i = 0; i < N * N; i++) {
+    if (*pb != *pc_v1 || *pb != *pc_v2) {
+      fprintf(stderr, "mismatch at %u: (b: %d, c_v1: %d, c_v2: %d)\n", i, *pb,
+              *pc_v1, *pc_v2);
+    }
+    ++pb, ++pc_v1, ++pc_v2;
+  }
+  fprintf(stderr,
+          "completed matrix_squaring: cpu %lfms gpu_v1 %lfms gpu_v2 %lfms\n",
+          cpu_time, gpu_time_v1, gpu_time_v2);
 }
 
 void occupancy_info() {

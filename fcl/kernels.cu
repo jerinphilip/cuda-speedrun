@@ -43,3 +43,21 @@ __global__ void scalar_init(int *A) {
   size_t id = blockIdx.x * blockDim.x + threadIdx.x;
   A[id] = static_cast<int>(id);
 }
+
+__global__ void matrix_square_v1(const int *A, size_t N, int *B) {
+  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  for (size_t j = 0; j < N; ++j) {
+    for (size_t k = 0; k < N; ++k) {
+      B[id * N + j] += A[id * N + k] * A[k * N + j];
+    }
+  }
+}
+
+__global__ void matrix_square_v2(const int *A, size_t N, int *B) {
+  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  size_t i = id / N;
+  size_t j = id % N;
+  for (size_t k = 0; k < N; ++k) {
+    B[i * N + j] += A[i * N + k] * A[k * N + j];
+  }
+}

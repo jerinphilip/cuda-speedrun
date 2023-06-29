@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   ADD_FN(occupancy_info);
   ADD_FN(hello_world);
   ADD_FN(matrix_init);
+  ADD_FN(matrix_squaring);
 
   return 0;
 }
