@@ -5,3 +5,4 @@ a.out
 
 .cache/
 build/
+session.vim
