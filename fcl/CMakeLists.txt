@@ -1,1 +1,1 @@
-add_executable(fcl frontend.cc examples.cu kernels.cu timer.cpp)
+add_executable(fcl frontend.cc examples.cu kernels.cu timer.cc error.cu)
