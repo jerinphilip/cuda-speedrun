@@ -94,9 +94,10 @@ class Buffer {
 
   const Device &device() const { return device_; }
   Scalar *data() { return buffer_->data(); }
+  const Scalar *data() const { return buffer_->data(); }
   size_t size() const { return buffer_->size(); }
 
-  Buffer<Scalar> to(Device device) {
+  Buffer<Scalar> to(Device device) const {
     if (device == Device::CPU and device_ == Device::GPU) {
       Buffer<Scalar> target(size_, device);
       size_t mem_size = size_ * sizeof(Scalar);
@@ -114,6 +115,26 @@ class Buffer {
 
     std::cerr << "Unsupported conversion between devices\n";
     std::abort();
+  }
+
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const Buffer<Scalar> &buffer) {
+    if (buffer.device() == Device::GPU) {
+      auto host_buffer = buffer.to(Device::CPU);
+      out << host_buffer;
+    } else {
+      const Scalar *start = buffer.data();
+      const Scalar *end = start + buffer.size();
+      out << "Buffer(device = cpu, [";
+      for (const Scalar *p = start; p != end; ++p) {
+        if (p != start) {
+          out << " ";
+        }
+        out << *p;
+      }
+      out << "]";
+    }
+    return out;
   }
 
  private:

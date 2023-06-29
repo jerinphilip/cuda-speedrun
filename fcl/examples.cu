@@ -36,6 +36,7 @@ void compare_fused_separate() {
 
   auto validate = [&](Buffer<int> &gc) {
     Buffer<int> c = gc.to(Device::CPU);
+    std::cout << c << "\n";
 
     int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
     for (size_t i = 0; i < c.size(); i++) {              // NOLINT
