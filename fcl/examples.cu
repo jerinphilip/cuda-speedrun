@@ -8,6 +8,11 @@
 #include "fcl/kernels.h"
 #include "fcl/timer.h"
 
+#define TRACE(x)                          \
+  do {                                    \
+    std::cerr << #x << ": " << x << "\n"; \
+  } while (0)
+
 void compare_fused_separate() {
   constexpr size_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
@@ -43,7 +48,7 @@ void compare_fused_separate() {
   Buffer<int> pc = pipelined();
   double pc_runtime = fp.elapsed() * 1000;
 
-  auto validate = [&](const Buffer<int> &gc) -> bool {
+  auto validate = [&](const Buffer<int>& gc) -> bool {
     bool flag = true;
     Buffer<int> c = gc.to(Device::CPU);
 
@@ -80,4 +85,30 @@ void matmul() {
   const size_t M = 1000, N = 1000, P = 1000;
   Buffer<int> A(M * N, Device::CPU);
   Buffer<int> B(N * P, Device::CPU);
+}
+
+void occupancy_info() {
+  // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
+  //     int* minGridSize, int* blockSize, T func,
+  //     UnaryFunction blockSizeToDynamicSMemSize, int blockSizeLimit = 0)
+
+  int min_grid_size, block_size;
+
+#define ESTIMATE_KERNEL(kernel)                                                \
+  do {                                                                         \
+    std::cerr << "kernel: " << #kernel << "\n";                                \
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, kernel, 0, \
+                                       0);                                     \
+    TRACE(min_grid_size);                                                      \
+    TRACE(block_size);                                                         \
+    std::cerr << "\n";                                                         \
+  } while (0)
+
+  ESTIMATE_KERNEL(fused_sqr_cub_add);
+  ESTIMATE_KERNEL(vsqr_);
+  ESTIMATE_KERNEL(vsqr);
+  ESTIMATE_KERNEL(vcube_);
+  ESTIMATE_KERNEL(vadd);
+
+#undef ESTIMATE_KERNEL
 }

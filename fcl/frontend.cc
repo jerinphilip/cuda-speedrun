@@ -8,9 +8,14 @@ int main(int argc, char **argv) {
   app.add_option("-e,--fn", example, "Example to execute")->required();
   CLI11_PARSE(app, argc, argv);
 
-  if (example == "compare_fused_separate") {
-    compare_fused_separate();
-  }
+// Macro abuse.
+#define ADD_FN(fn)            \
+  do {                        \
+    if (example == #fn) fn(); \
+  } while (0)
+
+  ADD_FN(compare_fused_separate);
+  ADD_FN(occupancy_info);
 
   return 0;
 }
