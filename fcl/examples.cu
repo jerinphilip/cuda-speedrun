@@ -107,6 +107,11 @@ void matmul() {
   Buffer<int> B(N * P, Device::CPU);
 }
 
+void hello_world() {
+  print_hello_world<<<1, 1>>>();
+  cudaDeviceSynchronize();
+}
+
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
   //     int* minGridSize, int* blockSize, T func,

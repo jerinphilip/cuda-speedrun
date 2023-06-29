@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 
   ADD_FN(compare_fused_separate);
   ADD_FN(occupancy_info);
+  ADD_FN(hello_world);
 
   return 0;
 }
