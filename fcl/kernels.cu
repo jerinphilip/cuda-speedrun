@@ -1,6 +1,6 @@
 #include <cuda.h>
 
-__global__ void vsqr(int *A) {
+__global__ void vsqt(int *A) {
   // Kernel computes vsqr for one  data-item.
   A[threadIdx.x] = threadIdx.x * threadIdx.x;
 }

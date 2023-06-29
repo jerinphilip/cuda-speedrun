@@ -28,15 +28,19 @@ class BaseBuffer {
  public:
   virtual Scalar *data() = 0;
   virtual size_t size() = 0;
+  ~BaseBuffer() = default;
 };
 
 template <class Scalar>
-class GPUBuffer : BaseBuffer<Scalar> {
+class GPUBuffer : public BaseBuffer<Scalar> {
  public:
   explicit GPUBuffer(size_t size) : size_(size) {
     size_t mem_size = size * sizeof(Scalar);
     cudaMalloc(&buffer_, mem_size);
+    cudaMemset(buffer_, 0, mem_size);
   }
+  Scalar *data() final { return buffer_; };
+  size_t size() final { return size_; };
 
   ~GPUBuffer() {
     // cudaFree, and some check.
@@ -49,11 +53,15 @@ class GPUBuffer : BaseBuffer<Scalar> {
 };
 
 template <class Scalar>
-class CPUBuffer {
+class CPUBuffer : public BaseBuffer<Scalar> {
+ public:
   explicit CPUBuffer(size_t size) : size_(size) {
     size_t mem_size = size * sizeof(Scalar);
     buffer_ = static_cast<Scalar *>(malloc(mem_size));
   }
+
+  Scalar *data() final { return buffer_; };
+  size_t size() final { return size_; };
 
   ~CPUBuffer() { free(buffer_); }
 
@@ -65,7 +73,24 @@ class CPUBuffer {
 template <class Scalar>
 class Buffer {
  public:
-  Buffer(size_t size, Device device) : size_(size), device_(device) {}
+  using GPUType = GPUBuffer<Scalar>;
+  using CPUType = CPUBuffer<Scalar>;
+  using OpaqueType = BaseBuffer<Scalar>;
+
+  static std::unique_ptr<OpaqueType> factory(size_t size, Device device) {
+    switch (device) {
+      case Device::CPU:
+        return std::make_unique<CPUType>(size);
+      case Device::GPU:
+        return std::make_unique<GPUType>(size);
+      default:
+        std::abort();
+    }
+    return nullptr;
+  }
+
+  Buffer(size_t size, Device device)
+      : size_(size), device_(device), buffer_(factory(size, device)) {}
 
   const Device &device() const { return device_; }
   Scalar *data() { return buffer_->data(); }
@@ -73,18 +98,18 @@ class Buffer {
 
   Buffer<Scalar> to(Device device) {
     if (device == Device::CPU and device_ == Device::GPU) {
-      Buffer<Scalar> result(size_, device);
+      Buffer<Scalar> target(size_, device);
       size_t mem_size = size_ * sizeof(Scalar);
-      cudaMemcpy(result.data(), buffer_->data(), mem_size,
+      cudaMemcpy(target.data(), buffer_->data(), mem_size,
                  cudaMemcpyDeviceToHost);
-      return result;
+      return target;
     }
     if (device == Device::GPU and device_ == Device::CPU) {
-      Buffer<Scalar> result(size_, device);
+      Buffer<Scalar> target(size_, device);
       size_t mem_size = size_ * sizeof(Scalar);
-      cudaMemcpy(buffer_->data(), result.data(), mem_size,
+      cudaMemcpy(target.data(), buffer_->data(), mem_size,
                  cudaMemcpyHostToDevice);
-      return result;
+      return target;
     }
 
     std::cerr << "Unsupported conversion between devices\n";
@@ -93,6 +118,6 @@ class Buffer {
 
  private:
   size_t size_;
-  std::unique_ptr<BaseBuffer<Scalar>> buffer_;
+  std::unique_ptr<OpaqueType> buffer_;
   Device device_;
 };

@@ -1,6 +1,7 @@
 #include <cuda.h>
 
 #include <cstdio>
+#include <numeric>
 #include <vector>
 
 #include "fcl/buffer.h"
@@ -9,9 +10,11 @@
 void compare_fused_separate() {
   constexpr size_t size = 1000;  // NOLINT
   Buffer<int> a(size, Device::CPU);
+  std::iota(a.data(), a.data() + a.size(), 0);
   auto ga = a.to(Device::GPU);
 
   Buffer<int> b(size, Device::CPU);
+  std::iota(b.data(), b.data() + b.size(), 0);
   auto gb = b.to(Device::GPU);
 
   auto pipelined = [&]() {
@@ -23,24 +26,29 @@ void compare_fused_separate() {
   };
 
   auto fused = [&]() {
-    Buffer<int> result(size, Device::GPU);
-    fused_sqr_cub_add<<<1, size>>>(ga.data(), gb.data(), result.data());
-    return result;
+    Buffer<int> c(size, Device::GPU);
+    fused_sqr_cub_add<<<1, size>>>(ga.data(), gb.data(), c.data());
+    return c;
   };
 
-  // Buffer<int> g_result = pipelined();
-  Buffer<int> gc = fused();
+  Buffer<int> pc = pipelined();
+  Buffer<int> fc = fused();
 
-  Buffer<int> c = gc.to(Device::CPU);
+  auto validate = [&](Buffer<int> &gc) {
+    Buffer<int> c = gc.to(Device::CPU);
 
-  int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
-  for (size_t i = 0; i < c.size(); i++) {              // NOLINT
-    int x = *px, y = *py, z = *pz;                     // NOLINT
-    if (z != x * x + y * y * y) {
-      fprintf(stderr, "Mismatch found.\n");
-      std::abort();
-    };
-    printf("%d\n", z);
-    ++px, ++py, ++pz;
-  }
+    int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
+    for (size_t i = 0; i < c.size(); i++) {              // NOLINT
+      int x = *px, y = *py, z = *pz;                     // NOLINT
+      int expected = x * x + y * y * y;
+      if (z != expected) {
+        printf("computed %d != %d expected\n", z, expected);
+        fprintf(stderr, "Mismatch found.\n");
+      };
+      ++px, ++py, ++pz;
+    }
+  };
+
+  validate(fc);
+  validate(pc);
 }
