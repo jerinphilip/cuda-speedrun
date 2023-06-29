@@ -102,7 +102,10 @@ void compare_fused_separate() {
 }
 
 void matrix_init() {
-  constexpr size_t M = 64, N = 64, P = 64;
+  // Setting this to 32 because 32*32 = 2 * 1024
+  // Doing larger than 2 does not work because of the 1024 threads restriction.
+
+  constexpr size_t M = 32, N = 32, P = 32;
   Buffer<int> A(M * N, Device::CPU);
   Buffer<int> B(N * P, Device::CPU);
 
@@ -113,8 +116,12 @@ void matrix_init() {
     scalar_init<<<M, N>>>(gA.data());
     scalar_init<<<N, P>>>(gB.data());
   } else {
-    scalar_init<<<M / 2, N * 2>>>(gA.data());
-    scalar_init<<<N / 2, P * 2>>>(gB.data());
+    // If I want the launch configuration to be <<<2, X>>>, what is X?  The rest
+    // of the code should be intact.
+
+    // Some factor math of the following appears to be working.
+    scalar_init<<<2, N * M / 2>>>(gA.data());
+    scalar_init<<<2, P * N / 2>>>(gB.data());
   }
 
   auto iA = gA.to(Device::CPU);
