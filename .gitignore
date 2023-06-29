@@ -2,3 +2,6 @@
 .*.sw[op]
 
 a.out
+
+.cache/
+build/
