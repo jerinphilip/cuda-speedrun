@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "fcl/buffer.h"
+#include "fcl/error.h"
 #include "fcl/kernels.h"
 #include "fcl/timer.h"
 
@@ -26,7 +27,10 @@ void compare_fused_separate() {
 
   // This does not work for size larger than 1024.
   // https://stackoverflow.com/questions/28928632/cuda-program-not-working-for-more-than-1024-threads
-  // gpuErrchk(cudaPeekAtLastError());
+  //
+  // This can be detected using the following:
+  //
+  //    gpuErrchk(cudaPeekAtLastError());
 
   constexpr size_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
@@ -57,10 +61,12 @@ void compare_fused_separate() {
   Timer ft;
   Buffer<int> fc = fused();
   double fc_runtime = ft.elapsed() * 1000;
+  gpuErrchk(cudaPeekAtLastError());
 
   Timer fp;
   Buffer<int> pc = pipelined();
   double pc_runtime = fp.elapsed() * 1000;
+  gpuErrchk(cudaPeekAtLastError());
 
   auto validate = [&](const Buffer<int>& gc) -> bool {
     bool flag = true;
