@@ -1,7 +1,8 @@
-#pragma once
 #include <cuda.h>
 
 #include <cstdio>
+
+using dim_t = int32_t;
 
 __global__ void vsqr(int *A) {
   // Kernel computes vsqr for one  data-item.
@@ -41,24 +42,34 @@ __global__ void print_hello_world() {
 }
 
 __global__ void scalar_init(int *A) {
-  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
   A[id] = static_cast<int>(id);
 }
 
-__global__ void matrix_square_v1(const int *A, size_t N, int *B) {
-  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
-  for (size_t j = 0; j < N; ++j) {
-    for (size_t k = 0; k < N; ++k) {
+__global__ void matrix_square_v1(const int *A, dim_t N, int *B) {
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  for (dim_t j = 0; j < N; ++j) {
+    for (dim_t k = 0; k < N; ++k) {
       B[id * N + j] += A[id * N + k] * A[k * N + j];
     }
   }
 }
 
-__global__ void matrix_square_v2(const int *A, size_t N, int *B) {
-  size_t id = blockIdx.x * blockDim.x + threadIdx.x;
-  size_t i = id / N;
-  size_t j = id % N;
-  for (size_t k = 0; k < N; ++k) {
+__global__ void matrix_square_v2(const int *A, dim_t N, int *B) {
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  dim_t i = id / N;
+  dim_t j = id % N;
+  for (dim_t k = 0; k < N; ++k) {
     B[i * N + j] += A[i * N + k] * A[k * N + j];
   }
+}
+
+__global__ void warp_branch_paths(int *A, dim_t size) {
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  if (id % 2) {
+    A[id] = id;
+  } else {
+    A[id] = size * size;
+  }
+  A[id]++;
 }

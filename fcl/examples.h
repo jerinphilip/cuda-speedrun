@@ -6,3 +6,4 @@ void occupancy_info();
 void hello_world();
 void matrix_init();
 void matrix_squaring();
+void warp_with_conditions();

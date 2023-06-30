@@ -32,7 +32,7 @@ void compare_fused_separate() {
   //
   //    gpuErrchk(cudaPeekAtLastError());
 
-  constexpr size_t size = 1024;  // NOLINT
+  constexpr dim_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
   std::fill(a.data(), a.data() + a.size(), 1);
   auto ga = a.to(Device::GPU);
@@ -77,7 +77,7 @@ void compare_fused_separate() {
     // std::cout << "c: " << c << "\n\n";
 
     int *px = a.data(), *py = b.data(), *pz = c.data();  // NOLINT
-    for (size_t i = 0; i < c.size(); i++) {              // NOLINT
+    for (dim_t i = 0; i < c.size(); i++) {               // NOLINT
       int x = *px, y = *py, z = *pz;                     // NOLINT
       int expected = x * x + y * y * y;
       if (z != expected) {
@@ -105,7 +105,7 @@ void matrix_init() {
   // Setting this to 32 because 32*32 = 2 * 1024
   // Doing larger than 2 does not work because of the 1024 threads restriction.
 
-  constexpr size_t M = 32, N = 32, P = 32;
+  constexpr dim_t M = 32, N = 32, P = 32;
   Buffer<int> A(M * N, Device::CPU);
   Buffer<int> B(N * P, Device::CPU);
 
@@ -137,17 +137,17 @@ void hello_world() {
 }
 
 void matrix_squaring() {
-  auto matrix_square_cpu = [](const int *A, size_t N, int *B) {
-    for (size_t i = 0; i < N; ++i) {
-      for (size_t j = 0; j < N; ++j) {
-        for (size_t k = 0; k < N; ++k) {
+  auto matrix_square_cpu = [](const int *A, dim_t N, int *B) {
+    for (dim_t i = 0; i < N; ++i) {
+      for (dim_t j = 0; j < N; ++j) {
+        for (dim_t k = 0; k < N; ++k) {
           B[i * N + j] += A[i * N + k] * A[k * N + j];
         }
       }
     }
   };
 
-  constexpr size_t N = 64;
+  constexpr dim_t N = 64;
 
   Buffer<int> A(N * N, Device::CPU);
 
@@ -184,7 +184,7 @@ void matrix_squaring() {
   auto C_v2 = gB_v2.to(Device::CPU);
 
   int *pb = B.data(), *pc_v1 = C_v1.data(), *pc_v2 = C_v2.data();  // NOLINT
-  for (size_t i = 0; i < N * N; i++) {
+  for (dim_t i = 0; i < N * N; i++) {
     if (*pb != *pc_v1 || *pb != *pc_v2) {
       fprintf(stderr, "mismatch at %u: (b: %d, c_v1: %d, c_v2: %d)\n", i, *pb,
               *pc_v1, *pc_v2);
@@ -195,6 +195,8 @@ void matrix_squaring() {
           "completed matrix_squaring: cpu %lfms gpu_v1 %lfms gpu_v2 %lfms\n",
           cpu_time, gpu_time_v1, gpu_time_v2);
 }
+
+void warp_with_conditions() {}
 
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
