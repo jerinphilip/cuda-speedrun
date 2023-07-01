@@ -1,7 +1,7 @@
 #pragma once
 #include <cuda.h>
 
-using dim_t = int32_t;
+#include "fcl/types.h"
 
 __global__ void vsqr(int *A);
 __global__ void vadd(const int *A, const int *B, int *C);

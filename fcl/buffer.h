@@ -9,12 +9,7 @@
 #include <vector>
 
 #include "fcl/error.h"
-
-using dim_t = int32_t;
-
-// NOLINTBEGIN
-enum class Device { CPU, GPU };
-// NOLINTEND
+#include "fcl/types.h"
 
 template <class Scalar>
 class BaseBuffer {

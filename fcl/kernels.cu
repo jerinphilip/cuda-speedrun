@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-using dim_t = int32_t;
+#include "fcl/kernels.h"
 
 __global__ void vsqr(int *A) {
   // Kernel computes vsqr for one  data-item.
