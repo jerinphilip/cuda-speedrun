@@ -1,4 +1,5 @@
 #pragma once
+#include <cuda_runtime.h>
 
 // Adapted from https://stackoverflow.com/a/14038590/4565794
 //

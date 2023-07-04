@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 enable_language("CUDA")
-find_package(CUDA 8.0)
+find_package(CUDA 8.0 REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
 
 add_subdirectory(3rd-party)
 include_directories(3rd-party)
