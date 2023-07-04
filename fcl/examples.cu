@@ -311,7 +311,6 @@ void occupancy_info() {
 
   ESTIMATE_KERNEL(fused_sqr_cub_add);
   ESTIMATE_KERNEL(vsqr_);
-  ESTIMATE_KERNEL(vsqr);
   ESTIMATE_KERNEL(vcube_);
   ESTIMATE_KERNEL(vadd);
 
