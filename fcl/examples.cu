@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <numeric>
+#include <random>
 #include <vector>
 
 #include "fcl/buffer.h"
@@ -222,6 +223,37 @@ void aos_vs_soa() {
   soa_pass<<<1, N>>>(soa_nodes.is, soa_nodes.ds, soa_nodes.cs, N);
 
   fprintf(stderr, "Time aos = %lf, soa = %lf\n", aos_time, soa_time);
+}
+
+void maximum_in_a_large_array() {
+  constexpr dim_t N = 1024;
+  constexpr dim_t K = 32;
+
+  assert(N % K == 0);
+  constexpr dim_t partitions = N / K;
+
+  Buffer<int> cx(N, Device::CPU);
+  int *A = cx.data();
+
+  std::mt19937_64 generator(/*seed=*/42);
+  constexpr int max_value = 1e9;
+
+  for (size_t i = 0; i < cx.size(); i++) {
+    A[i] = generator() % max_value;
+  }
+
+  std::cout << "xs: " << cx << "\n";
+
+  auto xs = cx.to(Device::GPU);
+  Buffer<int> ys(partitions, Device::GPU);
+  maximum_in_a_large_array_kernel<<<1, partitions>>>(xs.data(), xs.size(), K,
+                                                     ys.data());
+
+  Buffer<int> z(1, Device::GPU);
+  maximum_in_a_large_array_kernel<<<1, 1>>>(ys.data(), ys.size(), K, z.data());
+
+  std::cout << "ys: " << ys << "\n";
+  std::cout << "z: " << z << "\n";
 }
 
 void occupancy_info() {

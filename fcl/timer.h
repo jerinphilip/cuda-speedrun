@@ -44,6 +44,8 @@ class Timer {
   duration time_;        // Time duration from start() to stop()
 };
 
+// Adapted from:
+// https://forums.developer.nvidia.com/t/how-to-measure-total-time-for-cpu-and-gpu/28234
 template <>
 class Timer<Device::GPU> {
  public:

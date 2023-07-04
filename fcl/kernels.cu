@@ -1,5 +1,6 @@
 #include <cuda.h>
 
+#include <cassert>
 #include <cstdio>
 
 #include "fcl/kernels.h"
@@ -75,15 +76,35 @@ __global__ void warp_branch_paths(int *A, dim_t size) {
 }
 
 __global__ void aos_pass(Node *nodes, dim_t size) {
-  unsigned id = blockIdx.x * blockDim.x + threadIdx.x;
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
   nodes[id].i = id;
   nodes[id].d = 0.0F;
   nodes[id].c = 'c';
 }
 
 __global__ void soa_pass(int *is, double *ds, char *cs, dim_t size) {
-  unsigned id = blockIdx.x * blockDim.x + threadIdx.x;
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
   is[id] = id;
   ds[id] = 0.0f;
   cs[id] = 'd';
+}
+
+__global__ void maximum_in_a_large_array_kernel(const int *xs, dim_t size,
+                                                dim_t partition_size, int *ys) {
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // threadId i computes for i*32, (i+1)*32
+  dim_t start = id * partition_size;
+  dim_t end = start + partition_size;
+
+  // Precondition, not checked in non-debug builds.
+  assert(end <= size);
+
+  int x_max = xs[start];
+  for (dim_t i = start + 1; i < end; i++) {
+    x_max = xs[i] > x_max ? xs[i] : x_max;
+  }
+
+  // Write output.
+  ys[id] = x_max;
 }

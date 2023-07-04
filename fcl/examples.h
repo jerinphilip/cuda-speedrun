@@ -8,3 +8,4 @@ void matrix_init();
 void matrix_squaring();
 void warp_with_conditions();
 void aos_vs_soa();
+void maximum_in_a_large_array();
