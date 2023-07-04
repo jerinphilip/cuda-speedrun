@@ -275,6 +275,23 @@ void find_element() {
   std::cout << "out: " << out << "\n";
 }
 
+void identifiers() {
+  // $ deviceQuery says:
+  //
+  //   28 Multiprocessors,
+  //  128 CUDA Cores/MP
+  // 3584 CUDA Cores
+  //
+  // Max dimension size of a
+  //   thread block (x,y,z): (1024, 1024, 64)
+  //   grid size    (x,y,z): (2147483647, 65535, 65535)
+
+  dim3 grid(2, 3, 4);
+  dim3 block(5, 6, 7);
+  block_thread_dispatch_identifier<<<grid, block>>>();
+  cudaDeviceSynchronize();
+}
+
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
   //     int* minGridSize, int* blockSize, T func,

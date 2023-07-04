@@ -48,3 +48,5 @@ __global__ void maximum_in_a_large_array_kernel(const int *xs, dim_t size,
 
 __global__ void find_element_kernel(const int *xs, dim_t size,
                                     dim_t partition_size, int query, int *out);
+
+__global__ void block_thread_dispatch_identifier();

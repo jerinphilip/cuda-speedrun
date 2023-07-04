@@ -10,3 +10,4 @@ void warp_with_conditions();
 void aos_vs_soa();
 void maximum_in_a_large_array();
 void find_element();
+void identifiers();

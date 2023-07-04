@@ -122,3 +122,14 @@ __global__ void find_element_kernel(const int *xs, dim_t size,
     }
   }
 }
+
+__global__ void block_thread_dispatch_identifier() {
+  if (threadIdx.x == 0 && blockIdx.x == 0 && threadIdx.y == 0 &&
+      blockIdx.y == 0 && threadIdx.z == 0 && blockIdx.z == 0) {
+    printf("[narrow] %d %d %d %d %d %d.\n", gridDim.x, gridDim.y, gridDim.z,
+           blockDim.x, blockDim.y, blockDim.z);
+  }
+
+  printf("[all] %d %d %d %d %d %d.\n", threadIdx.x, threadIdx.y, threadIdx.z,
+         blockIdx.x, blockIdx.y, blockIdx.z);
+}
