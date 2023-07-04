@@ -57,8 +57,7 @@ class Timer<Device::GPU> {
     gpuErrchk(cudaEventRecord(stop_, 0));
     gpuErrchk(cudaEventSynchronize(stop_));
     gpuErrchk(cudaEventElapsedTime(&elapsed_, start_, stop_));
-    printf("The elapsed time in gpu was %.2f ms", elapsed_);
-    return elapsed_;
+    return elapsed_ / 1000;
   }
 
   ~Timer() {

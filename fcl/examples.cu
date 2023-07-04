@@ -202,13 +202,13 @@ void aos_vs_soa() {
   constexpr dim_t N = 1000;
 
   // Array of structures (AoS)
-  Timer aos_timer;
+  Timer<Device::GPU> aos_timer;
   Buffer<Node> aos_nodes(N, Device::GPU);
   aos_pass<<<1, N>>>(aos_nodes.data(), aos_nodes.size());
   double aos_time = aos_timer.elapsed() * 1000;
 
   // Structure of Arrays (SoA)
-  Timer soa_timer;
+  Timer<Device::GPU> soa_timer;
   Buffer<int> is(N, Device::GPU);
   Buffer<double> ds(N, Device::GPU);
   Buffer<char> cs(N, Device::GPU);
