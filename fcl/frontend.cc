@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
   ADD_FN(hello_world);
   ADD_FN(matrix_init);
   ADD_FN(matrix_squaring);
+  ADD_FN(aos_vs_soa);
 
   return 0;
 }

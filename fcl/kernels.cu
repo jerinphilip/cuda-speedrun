@@ -73,3 +73,17 @@ __global__ void warp_branch_paths(int *A, dim_t size) {
   }
   A[id]++;
 }
+
+__global__ void aos_pass(Node *nodes, dim_t size) {
+  unsigned id = blockIdx.x * blockDim.x + threadIdx.x;
+  nodes[id].i = id;
+  nodes[id].d = 0.0F;
+  nodes[id].c = 'c';
+}
+
+__global__ void soa_pass(int *is, double *ds, char *cs, dim_t size) {
+  unsigned id = blockIdx.x * blockDim.x + threadIdx.x;
+  is[id] = id;
+  ds[id] = 0.0f;
+  cs[id] = 'd';
+}

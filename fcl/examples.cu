@@ -198,6 +198,32 @@ void matrix_squaring() {
 
 void warp_with_conditions() {}
 
+void aos_vs_soa() {
+  constexpr dim_t N = 1000;
+
+  // Array of structures (AoS)
+  Timer aos_timer;
+  Buffer<Node> aos_nodes(N, Device::GPU);
+  aos_pass<<<1, N>>>(aos_nodes.data(), aos_nodes.size());
+  double aos_time = aos_timer.elapsed() * 1000;
+
+  // Structure of Arrays (SoA)
+  Timer soa_timer;
+  Buffer<int> is(N, Device::GPU);
+  Buffer<double> ds(N, Device::GPU);
+  Buffer<char> cs(N, Device::GPU);
+  Nodes soa_nodes = {
+      .is = is.data(),  //
+      .ds = ds.data(),  //
+      .cs = cs.data()   //
+  };
+
+  double soa_time = soa_timer.elapsed() * 1000;
+  soa_pass<<<1, N>>>(soa_nodes.is, soa_nodes.ds, soa_nodes.cs, N);
+
+  fprintf(stderr, "Time aos = %lf, soa = %lf\n", aos_time, soa_time);
+}
+
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
   //     int* minGridSize, int* blockSize, T func,

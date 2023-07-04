@@ -22,3 +22,23 @@ __global__ void matrix_square_v1(const int *A, dim_t N, int *B);
 __global__ void matrix_square_v2(const int *A, dim_t N, int *B);
 
 __global__ void warp_branch_paths(int *A, dim_t size);
+
+// structure of Arrays vs array of structures.
+
+// Node in an array of nodes (structures).
+struct Node {
+  int i;
+  double d;
+  char c;
+};
+
+// struct holding node constituent arrays.
+// binding by index.
+struct Nodes {
+  int *is;
+  double *ds;
+  char *cs;
+};
+
+__global__ void aos_pass(Node *nodes, dim_t size);
+__global__ void soa_pass(int *is, double *ds, char *cs, dim_t size);
