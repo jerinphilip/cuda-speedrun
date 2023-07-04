@@ -58,12 +58,12 @@ void compare_fused_separate() {
   // Important to run fused after pipelined, because we're using in place vsqr_
   // and vcube_, which will affect outputs if pipelined is ran first.
 
-  Timer ft;
+  Timer<Device::GPU> ft;
   Buffer<int> fc = fused();
   double fc_runtime = ft.elapsed() * 1000;
   gpuErrchk(cudaPeekAtLastError());
 
-  Timer fp;
+  Timer<Device::GPU> fp;
   Buffer<int> pc = pipelined();
   double pc_runtime = fp.elapsed() * 1000;
   gpuErrchk(cudaPeekAtLastError());
@@ -169,14 +169,14 @@ void matrix_squaring() {
 
   // Version 1 is 1xN dispatch.
   // Each of the 1xN parallelizes the outer loop with index i.
-  Timer gpu_timer_v1;
+  Timer<Device::GPU> gpu_timer_v1;
   matrix_square_v1<<<1, N>>>(gA.data(), N, gB_v1.data());
   double gpu_time_v1 = gpu_timer_v1.elapsed() * 1000;
 
   // Version 2 is NxN dispatch.
   // Each of the NxN retrieves i, j as idx/N and idx%N
   // And executes the loop over k.
-  Timer gpu_timer_v2;
+  Timer<Device::GPU> gpu_timer_v2;
   matrix_square_v2<<<N, N>>>(gA.data(), N, gB_v2.data());
   double gpu_time_v2 = gpu_timer_v2.elapsed() * 1000;
 
@@ -199,7 +199,7 @@ void matrix_squaring() {
 void warp_with_conditions() {}
 
 void aos_vs_soa() {
-  constexpr dim_t N = 1000;
+  constexpr dim_t N = 1024;
 
   // Array of structures (AoS)
   Timer<Device::GPU> aos_timer;
