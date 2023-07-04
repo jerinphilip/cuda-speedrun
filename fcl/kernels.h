@@ -45,3 +45,6 @@ __global__ void soa_pass(int *is, double *ds, char *cs, dim_t size);
 
 __global__ void maximum_in_a_large_array_kernel(const int *xs, dim_t size,
                                                 dim_t partition_size, int *ys);
+
+__global__ void find_element_kernel(const int *xs, dim_t size,
+                                    dim_t partition_size, int query, int *out);

@@ -108,3 +108,17 @@ __global__ void maximum_in_a_large_array_kernel(const int *xs, dim_t size,
   // Write output.
   ys[id] = x_max;
 }
+
+__global__ void find_element_kernel(const int *xs, dim_t size,
+                                    dim_t partition_size, int query, int *out) {
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+  dim_t start = id * partition_size;
+  dim_t end = start + partition_size;
+  for (dim_t i = start; i < end; i++) {
+    if (xs[i] == query) {
+      *out = i;
+      // We're done, return.
+      return;
+    }
+  }
+}

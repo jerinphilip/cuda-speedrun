@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
   ADD_FN(matrix_squaring);
   ADD_FN(aos_vs_soa);
   ADD_FN(maximum_in_a_large_array);
+  ADD_FN(find_element);
 
   fprintf(stderr,
           "Unknown example %s called. Please choose from the following.\n",

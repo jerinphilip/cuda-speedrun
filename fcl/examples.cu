@@ -15,6 +15,13 @@
     std::cerr << #x << ": " << x << "\n"; \
   } while (0)
 
+void fill_random_int(int *A, dim_t size, int max_value = 1e9) {
+  std::mt19937_64 generator(/*seed=*/42);
+  for (size_t i = 0; i < size; i++) {
+    A[i] = generator() % max_value;
+  }
+}
+
 void compare_fused_separate() {
   // The following exercise is in 2-computation, slide 19.
   // http://www.cse.iitm.ac.in/~rupesh/teaching/gpu/jan23/2-computation.pdf
@@ -233,14 +240,7 @@ void maximum_in_a_large_array() {
   constexpr dim_t partitions = N / K;
 
   Buffer<int> cx(N, Device::CPU);
-  int *A = cx.data();
-
-  std::mt19937_64 generator(/*seed=*/42);
-  constexpr int max_value = 1e9;
-
-  for (size_t i = 0; i < cx.size(); i++) {
-    A[i] = generator() % max_value;
-  }
+  fill_random_int(cx.data(), cx.size());
 
   std::cout << "xs: " << cx << "\n";
 
@@ -254,6 +254,25 @@ void maximum_in_a_large_array() {
 
   std::cout << "ys: " << ys << "\n";
   std::cout << "z: " << z << "\n";
+}
+
+void find_element() {
+  constexpr dim_t N = 1024;
+  constexpr dim_t K = 32;
+
+  assert(N % K == 0);
+  constexpr dim_t partitions = N / K;
+  Buffer<int> cx(N, Device::CPU);
+  std::iota(cx.data(), cx.data() + cx.size(), 0);
+
+  auto xs = cx.to(Device::GPU);
+  Buffer<int> out(1, Device::GPU);
+
+  const int query = 54;
+  find_element_kernel<<<1, partitions>>>(xs.data(), xs.size(), K, query,
+                                         out.data());
+
+  std::cout << "out: " << out << "\n";
 }
 
 void occupancy_info() {
