@@ -150,21 +150,27 @@ __global__ void add_nearby(int *A, dim_t M, dim_t N) {
   dim_t i = id / N;
   dim_t j = id % N;
 
+  // printf(
+  //     " id = blockIdx.x * blockDim.x + threadIdx.x\n"
+  //     " %d = %d * %d + %d\n"
+  //     "A[%d, %d] = %d\n",  //
+  //     id, blockIdx.x, blockDim.x, threadIdx.x, i, j, A[i * N + j]);
+
   // Copy over value to buffer.
   buffer[j] = A[i * N + j];
-  __syncthreads();
 
   if (j + 1 < N) {
     // This condition will be true for most threads, so no need to worry about
     // divergence.
-    buffer[j] += A[j + 1];
+    buffer[j] += A[i * N + (j + 1)];
+    // printf("Adding A[%d, %d] = %d\n", i, j + 1, A[i * N + (j + 1)]);
   }
 
   //  Synchronizes all threads within a block
   // – Used to prevent RAW / WAR / WAW hazards
   __syncthreads();
 
-  A[j] = buffer[j];
+  A[i * N + j] = buffer[j];
 }
 
 __global__ void hw_exec_info() {

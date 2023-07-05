@@ -144,6 +144,9 @@ class MatrixView {
     dim_t M = matrix.nrows(), N = matrix.ncols();
     out << "[";
     for (dim_t i = 0; i < M; i++) {
+      if (i != 0) {
+        out << "\n";
+      }
       out << "[";
       for (dim_t j = 0; j < N; j++) {
         if (j != 0) {
@@ -151,7 +154,7 @@ class MatrixView {
         }
         out << A[i * N + j];
       }
-      out << "]\n";
+      out << "]";
     }
     out << "]";
     return out;
