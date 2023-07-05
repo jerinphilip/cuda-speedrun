@@ -311,6 +311,24 @@ void identifiers() {
   gpuErrchk(cudaPeekAtLastError());
 }
 
+void add_nearby_shared_mem() {
+  // constexpr dim_t M = 1024, N = 1024;
+  constexpr dim_t M = 32, N = 32;
+  Buffer<int> cA(M * N, Device::CPU);
+
+  // Fill with [0...M*N]
+  std::iota(cA.data(), cA.data() + cA.size(), 0);
+
+  auto A = cA.to(Device::GPU);
+  add_nearby<<<M, N>>>(A.data(), M, N);
+
+  Buffer B = A.to(Device::CPU);
+  std::cout << MatrixView<int>(B.data(), M, N) << "\n";
+
+  // Let's have the thing scream at errors.
+  gpuErrchk(cudaPeekAtLastError());
+}
+
 void hw_runtime_info() {
   dim3 grid(10, 10);
   dim3 block(32, 32, 1);

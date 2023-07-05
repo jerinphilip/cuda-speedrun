@@ -129,28 +129,42 @@ __global__ void block_thread_dispatch_identifier() {
          threadIdx.y, threadIdx.z, blockIdx.x, blockIdx.y, blockIdx.z);
 }
 
-__global__ void add_nearby(int *A, dim_t size) {
-  // Exploit shared memory?
-  constexpr dim_t SIZE = 32;
+__global__ void add_nearby(int *A, dim_t M, dim_t N) {
+  // A is an M x N matrix, assuming row-major indexing for convenience.
+
+  // Each block corresponds to a row.
+  // Each thread is assigned a matrix element M[i, j]
+
+  // Buffer holds the copy of a row M[i, :]
+  // There are N items in the row.
+
+  // Shared Memory:
+  // * Programmable L1 cache / Scratchpad memory
+  // * Accessible only in a thread block
+  // * Useful for repeated small data or coordination
+  constexpr dim_t SIZE = 1024;
   __shared__ int buffer[SIZE];
+
   dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // Each row is assigned to a thread block.
-  // Each thread is assigned a matrix element M[i][j].
+  dim_t i = id / N;
+  dim_t j = id % N;
 
-  // Where do I zero initialize?
-  // Does this look efficient enough?
-  buffer[id] = 0;
+  // Copy over value to buffer.
+  buffer[j] = A[i * N + j];
   __syncthreads();
 
-  buffer[id] += A[id];
-  if (id + 1 < size) {
+  if (j + 1 < N) {
     // This condition will be true for most threads, so no need to worry about
     // divergence.
-    buffer[id] += A[id + 1];
+    buffer[j] += A[j + 1];
   }
+
+  //  Synchronizes all threads within a block
+  // – Used to prevent RAW / WAR / WAW hazards
   __syncthreads();
-  A[id] = buffer[id];
+
+  A[j] = buffer[j];
 }
 
 __global__ void hw_exec_info() {

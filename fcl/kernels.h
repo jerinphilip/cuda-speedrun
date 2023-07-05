@@ -50,6 +50,6 @@ __global__ void find_element_kernel(const int *xs, dim_t size,
 
 __global__ void block_thread_dispatch_identifier();
 
-__global__ void add_nearby(int *A);
+__global__ void add_nearby(int *A, dim_t M, dim_t N);
 
 __global__ void hw_exec_info();

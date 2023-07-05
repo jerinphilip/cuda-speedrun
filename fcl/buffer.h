@@ -61,6 +61,7 @@ class CPUBuffer : public BaseBuffer<Scalar> {
 template <class Scalar>
 class Buffer {
  public:
+  using ScalarType = Scalar;
   using GPUType = GPUBuffer<Scalar>;
   using CPUType = CPUBuffer<Scalar>;
   using OpaqueType = BaseBuffer<Scalar>;
@@ -129,4 +130,39 @@ class Buffer {
   dim_t size_;
   std::unique_ptr<OpaqueType> buffer_;
   Device device_;
+};
+
+template <class Scalar>
+class MatrixView {
+ public:
+  MatrixView(Scalar *data, dim_t nrows, dim_t ncols)
+      : data_(data), nrows_(nrows), ncols_(ncols) {}
+
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const MatrixView<Scalar> &matrix) {
+    const Scalar *A = matrix.cdata();
+    dim_t M = matrix.nrows(), N = matrix.ncols();
+    out << "[";
+    for (dim_t i = 0; i < M; i++) {
+      out << "[";
+      for (dim_t j = 0; j < N; j++) {
+        if (j != 0) {
+          out << " ";
+        }
+        out << A[i * N + j];
+      }
+      out << "]\n";
+    }
+    out << "]";
+    return out;
+  }
+
+  dim_t nrows() const { return nrows_; }
+  dim_t ncols() const { return ncols_; }
+  const Scalar *cdata() const { return data_; }
+
+ private:
+  Scalar *data_;
+  dim_t nrows_;
+  dim_t ncols_;
 };

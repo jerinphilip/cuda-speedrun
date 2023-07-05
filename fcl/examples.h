@@ -12,3 +12,4 @@ void maximum_in_a_large_array();
 void find_element();
 void identifiers();
 void hw_runtime_info();
+void add_nearby_shared_mem();
