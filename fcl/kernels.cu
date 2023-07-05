@@ -4,11 +4,7 @@
 #include <cstdio>
 
 #include "fcl/kernels.h"
-
-__global__ void vsqr(int *A) {
-  // Kernel computes vsqr for one  data-item.
-  A[threadIdx.x] = threadIdx.x * threadIdx.x;
-}
+#include "fcl/utils.h"
 
 __global__ void vsqr_(int *A) {  // NOLINT
   // Kernel computes vsqr for one  data-item.
@@ -129,7 +125,36 @@ __global__ void block_thread_dispatch_identifier() {
     printf("[narrow] %d %d %d %d %d %d.\n", gridDim.x, gridDim.y, gridDim.z,
            blockDim.x, blockDim.y, blockDim.z);
   }
+  printf("[all] threadId = (%d %d %d), blockId =(%d %d %d).\n", threadIdx.x,
+         threadIdx.y, threadIdx.z, blockIdx.x, blockIdx.y, blockIdx.z);
+}
 
-  printf("[all] %d %d %d %d %d %d.\n", threadIdx.x, threadIdx.y, threadIdx.z,
-         blockIdx.x, blockIdx.y, blockIdx.z);
+__global__ void add_nearby(int *A, dim_t size) {
+  // Exploit shared memory?
+  constexpr dim_t SIZE = 32;
+  __shared__ int buffer[SIZE];
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // Each row is assigned to a thread block.
+  // Each thread is assigned a matrix element M[i][j].
+
+  // Where do I zero initialize?
+  // Does this look efficient enough?
+  buffer[id] = 0;
+  __syncthreads();
+
+  buffer[id] += A[id];
+  if (id + 1 < size) {
+    // This condition will be true for most threads, so no need to worry about
+    // divergence.
+    buffer[id] += A[id + 1];
+  }
+  __syncthreads();
+  A[id] = buffer[id];
+}
+
+__global__ void hw_exec_info() {
+  int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  printf("(thread: %d, SM: %d, warp-id: %d, warp-lane: %d)\n", idx, __smid(),
+         __warpid(), __laneid());
 }

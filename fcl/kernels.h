@@ -49,3 +49,7 @@ __global__ void find_element_kernel(const int *xs, dim_t size,
                                     dim_t partition_size, int query, int *out);
 
 __global__ void block_thread_dispatch_identifier();
+
+__global__ void add_nearby(int *A);
+
+__global__ void hw_exec_info();

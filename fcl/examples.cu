@@ -272,24 +272,51 @@ void find_element() {
   find_element_kernel<<<1, partitions>>>(xs.data(), xs.size(), K, query,
                                          out.data());
 
+  // Need to wait for kernel to finish.
+  cudaDeviceSynchronize();
   std::cout << "out: " << out << "\n";
 }
 
 void identifiers() {
   // $ deviceQuery says:
   //
-  //   28 Multiprocessors,
-  //  128 CUDA Cores/MP
-  // 3584 CUDA Cores
+  //    28 Multiprocessors
+  // x 128 CUDA Cores/MP
+  //----------------------
+  //  3584 CUDA Cores
   //
   // Max dimension size of a
   //   thread block (x,y,z): (1024, 1024, 64)
   //   grid size    (x,y,z): (2147483647, 65535, 65535)
+  //
+  // The above values do not appear to be the actual limits, but these are
+  // bound by hardware.
 
-  dim3 grid(2, 3, 4);
-  dim3 block(5, 6, 7);
+  // grid.z is ignored, so no point setting it.
+  // grid = collection of blocks (logical, not physical).
+  dim3 grid(32, 32);
+
+  // $ deviceQuery says:
+  //
+  //    Maximum number of threads per block: 1024
+
+  // This implies the following constraint:
+  // block.x * block.y * block.z <= 1024
+  dim3 block(32, 32, 1);
+
   block_thread_dispatch_identifier<<<grid, block>>>();
   cudaDeviceSynchronize();
+
+  // Let's have the thing scream at errors.
+  gpuErrchk(cudaPeekAtLastError());
+}
+
+void hw_runtime_info() {
+  dim3 grid(10, 10);
+  dim3 block(32, 32, 1);
+  hw_exec_info<<<grid, block>>>();
+  cudaDeviceSynchronize();
+  gpuErrchk(cudaPeekAtLastError());
 }
 
 void occupancy_info() {
