@@ -155,6 +155,7 @@ __global__ void add_nearby(int *A, dim_t size) {
 
 __global__ void hw_exec_info() {
   int idx = threadIdx.x + blockDim.x * blockIdx.x;
-  printf("(thread: %d, SM: %d, warp-id: %d, warp-lane: %d)\n", idx, __smid(),
+  // warp-id is sus, see warp-id function for more information.
+  printf("thread: %d\tSM: %d\twarp-id*: %d\t warp-lane: %d\n", idx, __smid(),
          __warpid(), __laneid());
 }
