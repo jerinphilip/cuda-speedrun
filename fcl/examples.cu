@@ -15,6 +15,8 @@
     std::cerr << #x << ": " << x << "\n"; \
   } while (0)
 
+extern __constant__ char *constant_buffer;
+
 void fill_random_int(int *A, dim_t size, int max_value = 1e9) {
   std::mt19937_64 generator(/*seed=*/42);
   for (size_t i = 0; i < size; i++) {
@@ -352,9 +354,11 @@ void constant_memory_example() {
 
   std::cout << cA << "\n";
 
-  cudaError_t error = cudaMemcpyToSymbol(
-      constant_buffer, reinterpret_cast<char *>(cA.data()), N * sizeof(int));
+  cudaError_t error =
+      cudaMemcpyToSymbol(constant_buffer, reinterpret_cast<char *>(cA.data()),
+                         N * sizeof(int), /*offset=*/0, cudaMemcpyHostToDevice);
 
+  cudaDeviceSynchronize();
   Buffer<int> A(N, Device::GPU);
   constant_memory_kernel<<<1, N>>>(A.data(), A.size());
   std::cout << A << "\n";

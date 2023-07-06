@@ -192,6 +192,8 @@ __global__ void dynshared() {
   }
 }
 
+extern __constant__ char constant_buffer[CONSTANT_BUFFER_SIZE];
+
 __global__ void constant_memory_kernel(int *A, dim_t size) {
   int i = threadIdx.x;
   int *source = reinterpret_cast<int *>(&constant_buffer[0]);

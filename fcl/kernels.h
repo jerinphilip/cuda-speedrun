@@ -59,7 +59,6 @@ __global__ void dynshared();
 // Constant memory, read only.
 // 64KB per streaming multiprocessor.
 constexpr dim_t CONSTANT_BUFFER_SIZE = 64 * 1024;  // 64 KB?
-__constant__ char constant_buffer[CONSTANT_BUFFER_SIZE];
 
 // kernels to operate on constant-memory
 __global__ void constant_memory_kernel(int *A, dim_t size);
