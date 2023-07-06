@@ -192,11 +192,53 @@ __global__ void dynshared() {
   }
 }
 
-extern __constant__ char constant_buffer[CONSTANT_BUFFER_SIZE];
-
 __global__ void constant_memory_kernel(int *A, dim_t size) {
   int i = threadIdx.x;
   int *source = reinterpret_cast<int *>(&constant_buffer[0]);
   A[i] = source[i];
   printf("Setting A[%d] = %d\n", i, source[i]);
+}
+
+__global__ void avg_classwork_kernel(Point *A, dim_t size, int *global_sum) {
+  // Write CUDA code for the following functionality.
+  // – Assume following data type, filled with some values.
+  //   struct Point { int x, y; } arr[N];
+  // – Each thread should operate on 4 elements.
+  // – Find the average AVG of x values.
+  // – If a thread sees y value above the average, it replaces all 4 y values
+  //   with AVG.
+  // – Otherwise, it adds y values to a global sum.
+  // – Host prints the number of elements set to AVG
+
+  dim_t id = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // Each thread operates on 4 elements.
+  // [4*id, 4*id + 4]
+  const dim_t batch_size = 4;
+  dim_t start = batch_size * id;
+  dim_t end = start + batch_size;
+
+  // Find average of x values.
+  int sum = 0;
+  for (dim_t i = start; i < end; i++) {
+    sum += A[i].x;
+  }
+
+  int average = sum / batch_size;
+
+  // Does the thread see y value above average?
+  bool y_above_avg_spotted = false;
+  for (dim_t i = start; i < end; i++) {
+    if (A[i].y > average) {
+      y_above_avg_spotted = true;
+    }
+  }
+
+  for (dim_t i = start; i < end; i++) {
+    if (y_above_avg_spotted) {
+      A[i].y = average;
+    } else {
+      *global_sum += A[i].y;
+    }
+  }
 }
