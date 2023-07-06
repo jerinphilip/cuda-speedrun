@@ -141,7 +141,7 @@ class Buffer {
 template <class Scalar>
 class MatrixView {
  public:
-  MatrixView(Scalar *data, dim_t nrows, dim_t ncols)
+  MatrixView(const Scalar *data, dim_t nrows, dim_t ncols)
       : data_(data), nrows_(nrows), ncols_(ncols) {}
 
   friend std::ostream &operator<<(std::ostream &out,
@@ -171,7 +171,7 @@ class MatrixView {
   const Scalar *cdata() const { return data_; }
 
  private:
-  Scalar *data_;
+  const Scalar *data_;
   dim_t nrows_;
   dim_t ncols_;
 };
