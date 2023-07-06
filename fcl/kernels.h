@@ -64,9 +64,4 @@ extern __constant__ char constant_buffer[CONSTANT_BUFFER_SIZE];
 // kernels to operate on constant-memory
 __global__ void constant_memory_kernel(int *A, dim_t size);
 
-struct Point {
-  int x;
-  int y;
-};
-
 __global__ void avg_classwork_kernel(Point *A, dim_t size, int *sum);

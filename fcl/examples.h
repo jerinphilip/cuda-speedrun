@@ -15,3 +15,4 @@ void hw_runtime_info();
 void add_nearby_shared_mem();
 void dynamic_shared_mem();
 void constant_memory_example();
+void avg_classwork();

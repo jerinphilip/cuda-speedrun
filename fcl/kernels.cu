@@ -226,6 +226,7 @@ __global__ void avg_classwork_kernel(Point *A, dim_t size, int *global_sum) {
   int average = sum / batch_size;
 
   // Does the thread see y value above average?
+  // No divergence below.
   bool y_above_avg_spotted = false;
   for (dim_t i = start; i < end; i++) {
     if (A[i].y > average) {
@@ -233,6 +234,10 @@ __global__ void avg_classwork_kernel(Point *A, dim_t size, int *global_sum) {
     }
   }
 
+  // The if-else's are a function of data, and warps may diverge in which branch
+  // among if/else gets executed.
+
+  // There is perhaps room for optimizations here.
   for (dim_t i = start; i < end; i++) {
     if (y_above_avg_spotted) {
       A[i].y = average;

@@ -1,6 +1,7 @@
 
 #pragma once
 #include <cstdint>
+#include <iostream>
 
 using dim_t = int32_t;
 
@@ -12,3 +13,9 @@ enum class Device : std::int8_t{
 };
 // clang-format on
 // NOLINTEND
+//
+struct Point {
+  int x;
+  int y;
+  friend std::ostream &operator<<(std::ostream &out, const Point &point);
+};

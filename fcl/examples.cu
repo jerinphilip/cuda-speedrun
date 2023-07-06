@@ -364,6 +364,34 @@ void constant_memory_example() {
   std::cout << A << "\n";
 }
 
+void avg_classwork() {
+  // constexpr dim_t SIZE = 1024;
+  constexpr dim_t SIZE = 32;
+  Buffer<Point> points(SIZE, Device::CPU);
+
+  std::mt19937_64 generator(/*seed=*/42);
+
+  constexpr int R = 1024;
+  std::uniform_int_distribution<int> uniform(0, R);
+
+  for (Point *p = points.begin(); p != points.end(); ++p) {
+    p->x = uniform(generator);
+    p->y = uniform(generator);
+  }
+
+  std::cout << points << "\n";
+
+  constexpr dim_t batch_size = 4;
+  constexpr dim_t num_threads = SIZE / batch_size;
+
+  auto gpu_points = points.to(Device::GPU);
+  Buffer<int> sum(1, Device::GPU);
+
+  avg_classwork_kernel<<<1, num_threads>>>(gpu_points.data(), SIZE, sum.data());
+
+  std::cout << gpu_points << "\n";
+}
+
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
   //     int* minGridSize, int* blockSize, T func,
