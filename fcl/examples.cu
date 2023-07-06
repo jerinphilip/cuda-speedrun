@@ -15,7 +15,7 @@
     std::cerr << #x << ": " << x << "\n"; \
   } while (0)
 
-extern __constant__ char *constant_buffer;
+__constant__ char constant_buffer[];
 
 void fill_random_int(int *A, dim_t size, int max_value = 1e9) {
   std::mt19937_64 generator(/*seed=*/42);
