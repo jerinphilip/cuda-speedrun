@@ -17,5 +17,6 @@ enum class Device : std::int8_t{
 struct Point {
   int x;
   int y;
-  friend std::ostream &operator<<(std::ostream &out, const Point &point);
 };
+
+std::ostream &operator<<(std::ostream &out, const Point &point);
