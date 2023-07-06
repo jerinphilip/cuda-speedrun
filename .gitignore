@@ -6,3 +6,6 @@ a.out
 .cache/
 build/
 session.vim
+
+# Mostly PDF and stuff, exclude
+resources/
