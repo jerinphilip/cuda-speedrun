@@ -53,3 +53,5 @@ __global__ void block_thread_dispatch_identifier();
 __global__ void add_nearby(int *A, dim_t M, dim_t N);
 
 __global__ void hw_exec_info();
+
+__global__ void dynshared();

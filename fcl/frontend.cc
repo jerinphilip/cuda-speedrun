@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
   ADD_FN(identifiers);
   ADD_FN(hw_runtime_info);
   ADD_FN(add_nearby_shared_mem);
+  ADD_FN(dynamic_shared_mem);
 
   fprintf(stderr,
           "Unknown example %s called. Please choose from the following.\n",

@@ -13,3 +13,4 @@ void find_element();
 void identifiers();
 void hw_runtime_info();
 void add_nearby_shared_mem();
+void dynamic_shared_mem();

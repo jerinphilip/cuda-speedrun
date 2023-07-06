@@ -337,6 +337,13 @@ void hw_runtime_info() {
   gpuErrchk(cudaPeekAtLastError());
 }
 
+void dynamic_shared_mem() {
+  dim_t n = 32;
+  dim_t memsize = n * sizeof(int);
+  dynshared<<<1, n, memsize>>>();
+  cudaDeviceSynchronize();
+}
+
 void occupancy_info() {
   // cudaOccupancyMaxPotentialBlockSizeVariableSMem(
   //     int* minGridSize, int* blockSize, T func,

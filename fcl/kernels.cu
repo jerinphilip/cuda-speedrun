@@ -179,3 +179,15 @@ __global__ void hw_exec_info() {
   printf("thread: %d\tSM: %d\twarp-id*: %d\t warp-lane: %d\n", idx, __smid(),
          __warpid(), __laneid());
 }
+
+__global__ void dynshared() {
+  extern __shared__ int s[];
+  dim_t i = threadIdx.x;
+  s[i] = i;
+  __syncthreads();
+
+  // For even threads, print.
+  if (i % 2) {
+    printf("%d\n", s[i]);
+  }
+}
