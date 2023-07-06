@@ -42,11 +42,11 @@ void compare_fused_separate() {
 
   constexpr dim_t size = 1024;  // NOLINT
   Buffer<int> a(size, Device::CPU);
-  std::fill(a.data(), a.data() + a.size(), 1);
+  std::fill(a.begin(), a.end(), 1);
   auto ga = a.to(Device::GPU);
 
   Buffer<int> b(size, Device::CPU);
-  std::fill(b.data(), b.data() + b.size(), 1);
+  std::fill(b.begin(), b.end(), 1);
   auto gb = b.to(Device::GPU);
 
   auto pipelined = [&]() {
@@ -160,13 +160,13 @@ void matrix_squaring() {
   Buffer<int> A(N * N, Device::CPU);
 
   // Initialize.
-  // std::iota(A.data(), A.data() + A.size(), 1);
-  std::fill(A.data(), A.data() + A.size(), 1);
+  // std::iota(A.begin(), A.end(), 1);
+  std::fill(A.begin(), A.end(), 1);
 
   auto gA = A.to(Device::GPU);
 
   Buffer<int> B(N * N, Device::CPU);
-  std::fill(B.data(), B.data() + B.size(), 0);
+  std::fill(B.begin(), B.end(), 0);
 
   auto gB_v1 = B.to(Device::GPU);
   auto gB_v2 = B.to(Device::GPU);
@@ -263,7 +263,7 @@ void find_element() {
   assert(N % K == 0);
   constexpr dim_t partitions = N / K;
   Buffer<int> cx(N, Device::CPU);
-  std::iota(cx.data(), cx.data() + cx.size(), 0);
+  std::iota(cx.begin(), cx.end(), 0);
 
   auto xs = cx.to(Device::GPU);
   Buffer<int> out(1, Device::GPU);
@@ -317,7 +317,7 @@ void add_nearby_shared_mem() {
   Buffer<int> cA(M * N, Device::CPU);
 
   // Fill with [0...M*N]
-  std::iota(cA.data(), cA.data() + cA.size(), 0);
+  std::iota(cA.begin(), cA.end(), 0);
 
   auto A = cA.to(Device::GPU);
   add_nearby<<<M, N>>>(A.data(), M, N);
@@ -342,6 +342,22 @@ void dynamic_shared_mem() {
   dim_t memsize = n * sizeof(int);
   dynshared<<<1, n, memsize>>>();
   cudaDeviceSynchronize();
+}
+
+void constant_memory_example() {
+  constexpr dim_t N = 32;
+  // constexpr dim_t N = CONSTANT_BUFFER_SIZE / sizeof(int);
+  Buffer<int> cA(N, Device::CPU);
+  std::iota(cA.begin(), cA.end(), 1);
+
+  std::cout << cA << "\n";
+
+  cudaError_t error = cudaMemcpyToSymbol(
+      constant_buffer, reinterpret_cast<char *>(cA.data()), N * sizeof(int));
+
+  Buffer<int> A(N, Device::GPU);
+  constant_memory_kernel<<<1, N>>>(A.data(), A.size());
+  std::cout << A << "\n";
 }
 
 void occupancy_info() {

@@ -86,6 +86,9 @@ class Buffer {
   const Scalar *data() const { return buffer_->data(); }
   dim_t size() const { return buffer_->size(); }
 
+  Scalar *begin() { return buffer_->data(); }
+  Scalar *end() { return buffer_->data() + buffer_->size(); }
+
   Buffer<Scalar> to(Device device) const {
     if (device == Device::CPU and device_ == Device::GPU) {
       Buffer<Scalar> target(size_, device);

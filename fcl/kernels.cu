@@ -191,3 +191,10 @@ __global__ void dynshared() {
     printf("%d\n", s[i]);
   }
 }
+
+__global__ void constant_memory_kernel(int *A, dim_t size) {
+  int i = threadIdx.x;
+  int *source = reinterpret_cast<int *>(&constant_buffer[0]);
+  A[i] = source[i];
+  printf("Setting A[%d] = %d\n", i, source[i]);
+}
