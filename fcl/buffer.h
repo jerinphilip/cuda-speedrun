@@ -66,18 +66,6 @@ class Buffer {
   using CPUType = CPUBuffer<Scalar>;
   using OpaqueType = BaseBuffer<Scalar>;
 
-  static std::unique_ptr<OpaqueType> factory(dim_t size, Device device) {
-    switch (device) {
-      case Device::CPU:
-        return std::make_unique<CPUType>(size);
-      case Device::GPU:
-        return std::make_unique<GPUType>(size);
-      default:
-        std::abort();
-    }
-    return nullptr;
-  }
-
   Buffer(dim_t size, Device device)
       : size_(size), device_(device), buffer_(factory(size, device)) {}
 
@@ -88,6 +76,9 @@ class Buffer {
 
   Scalar *begin() { return buffer_->data(); }
   Scalar *end() { return buffer_->data() + buffer_->size(); }
+
+  const Scalar *cbegin() const { return buffer_->data(); }
+  const Scalar *cend() const { return buffer_->data() + buffer_->size(); }
 
   Buffer<Scalar> to(Device device) const {
     if (device == Device::CPU and device_ == Device::GPU) {
@@ -115,8 +106,8 @@ class Buffer {
       auto host_buffer = buffer.to(Device::CPU);
       out << host_buffer;
     } else {
-      const Scalar *start = buffer.data();
-      const Scalar *end = start + buffer.size();
+      const Scalar *start = buffer.cbegin();
+      const Scalar *end = buffer.cend();
       out << "Buffer(device = cpu, [";
       for (const Scalar *p = start; p != end; ++p) {
         if (p != start) {
@@ -130,6 +121,18 @@ class Buffer {
   }
 
  private:
+  static std::unique_ptr<OpaqueType> factory(dim_t size, Device device) {
+    switch (device) {
+      case Device::CPU:
+        return std::make_unique<CPUType>(size);
+      case Device::GPU:
+        return std::make_unique<GPUType>(size);
+      default:
+        std::abort();
+    }
+    return nullptr;
+  }
+
   dim_t size_;
   std::unique_ptr<OpaqueType> buffer_;
   Device device_;
