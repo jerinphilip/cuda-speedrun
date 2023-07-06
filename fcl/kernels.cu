@@ -174,7 +174,7 @@ __global__ void add_nearby(int *A, dim_t M, dim_t N) {
 }
 
 __global__ void hw_exec_info() {
-  int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  int idx = blockIdx.x + blockDim.x * threadIdx.x;
   // warp-id is sus, see warp-id function for more information.
   printf("thread: %d\tSM: %d\twarp-id*: %d\t warp-lane: %d\n", idx, __smid(),
          __warpid(), __laneid());
